@@ -1,0 +1,701 @@
+<!DOCTYPE html>
+<html lang="id">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>StreamHub - CRUD Management Interface</title>
+    <style>
+        * {
+            margin: 0;
+            padding: 0;
+            box-sizing: border-box;
+        }
+
+        body {
+            font-family: 'Segoe UI', Tahoma, Geneva, Verdana, sans-serif;
+            background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
+            min-height: 100vh;
+            padding: 20px;
+        }
+
+        .container {
+            max-width: 1200px;
+            margin: 0 auto;
+            background: white;
+            border-radius: 15px;
+            box-shadow: 0 20px 60px rgba(0, 0, 0, 0.3);
+            overflow: hidden;
+        }
+
+        .header {
+            background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
+            color: white;
+            padding: 40px 20px;
+            text-align: center;
+        }
+
+        .header h1 {
+            font-size: 2.5em;
+            margin-bottom: 10px;
+        }
+
+        .header p {
+            font-size: 1.1em;
+            opacity: 0.9;
+        }
+
+        .content {
+            display: grid;
+            grid-template-columns: 1fr 1fr;
+            gap: 20px;
+            padding: 30px;
+        }
+
+        @media (max-width: 768px) {
+            .content {
+                grid-template-columns: 1fr;
+            }
+        }
+
+        .card {
+            border: 1px solid #e0e0e0;
+            border-radius: 10px;
+            padding: 25px;
+            background: #f9f9f9;
+            transition: all 0.3s ease;
+        }
+
+        .card:hover {
+            box-shadow: 0 5px 15px rgba(0, 0, 0, 0.1);
+        }
+
+        .card h2 {
+            color: #667eea;
+            margin-bottom: 20px;
+            font-size: 1.5em;
+            border-bottom: 2px solid #667eea;
+            padding-bottom: 10px;
+        }
+
+        .form-group {
+            margin-bottom: 15px;
+        }
+
+        .form-group label {
+            display: block;
+            margin-bottom: 5px;
+            color: #333;
+            font-weight: 500;
+            font-size: 0.9em;
+        }
+
+        .form-group input,
+        .form-group select,
+        .form-group textarea {
+            width: 100%;
+            padding: 10px;
+            border: 1px solid #ddd;
+            border-radius: 5px;
+            font-size: 0.95em;
+            font-family: inherit;
+            transition: border-color 0.3s;
+        }
+
+        .form-group input:focus,
+        .form-group select:focus,
+        .form-group textarea:focus {
+            outline: none;
+            border-color: #667eea;
+            box-shadow: 0 0 0 3px rgba(102, 126, 234, 0.1);
+        }
+
+        .form-group textarea {
+            resize: vertical;
+            min-height: 80px;
+        }
+
+        .btn-group {
+            display: flex;
+            gap: 10px;
+            flex-wrap: wrap;
+        }
+
+        button {
+            padding: 10px 20px;
+            border: none;
+            border-radius: 5px;
+            font-size: 0.95em;
+            font-weight: 600;
+            cursor: pointer;
+            transition: all 0.3s;
+        }
+
+        .btn-primary {
+            background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
+            color: white;
+            flex: 1;
+        }
+
+        .btn-primary:hover {
+            transform: translateY(-2px);
+            box-shadow: 0 5px 15px rgba(102, 126, 234, 0.4);
+        }
+
+        .btn-secondary {
+            background: #f0f0f0;
+            color: #333;
+            flex: 1;
+        }
+
+        .btn-secondary:hover {
+            background: #e0e0e0;
+        }
+
+        .btn-success {
+            background: #4caf50;
+            color: white;
+        }
+
+        .btn-danger {
+            background: #f44336;
+            color: white;
+        }
+
+        .btn-info {
+            background: #2196f3;
+            color: white;
+        }
+
+        .response-container {
+            margin-top: 20px;
+            padding: 15px;
+            border-radius: 5px;
+            display: none;
+            font-size: 0.9em;
+            font-family: 'Courier New', monospace;
+        }
+
+        .response-success {
+            background: #d4edda;
+            border: 1px solid #c3e6cb;
+            color: #155724;
+            display: block;
+        }
+
+        .response-error {
+            background: #f8d7da;
+            border: 1px solid #f5c6cb;
+            color: #721c24;
+            display: block;
+        }
+
+        .response-info {
+            background: #d1ecf1;
+            border: 1px solid #bee5eb;
+            color: #0c5460;
+            display: block;
+        }
+
+        .list-container {
+            max-height: 400px;
+            overflow-y: auto;
+            border: 1px solid #ddd;
+            border-radius: 5px;
+            padding: 10px;
+            background: white;
+        }
+
+        .list-item {
+            padding: 10px;
+            margin-bottom: 8px;
+            background: #f5f5f5;
+            border-radius: 5px;
+            border-left: 4px solid #667eea;
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+            cursor: pointer;
+            transition: all 0.3s;
+        }
+
+        .list-item:hover {
+            background: #e8e8ff;
+            transform: translateX(5px);
+        }
+
+        .list-item-info {
+            flex: 1;
+        }
+
+        .list-item-info strong {
+            color: #667eea;
+        }
+
+        .loading {
+            display: none;
+            text-align: center;
+            color: #667eea;
+            font-weight: 600;
+        }
+
+        .loading.active {
+            display: block;
+        }
+
+        .tabs {
+            display: flex;
+            gap: 10px;
+            margin-bottom: 20px;
+            border-bottom: 2px solid #e0e0e0;
+        }
+
+        .tab-button {
+            padding: 10px 20px;
+            background: none;
+            border: none;
+            border-bottom: 3px solid transparent;
+            cursor: pointer;
+            font-weight: 600;
+            color: #999;
+            transition: all 0.3s;
+        }
+
+        .tab-button.active {
+            color: #667eea;
+            border-bottom-color: #667eea;
+        }
+
+        .tab-button:hover {
+            color: #667eea;
+        }
+
+        .stats {
+            display: grid;
+            grid-template-columns: repeat(2, 1fr);
+            gap: 15px;
+            margin-bottom: 20px;
+        }
+
+        .stat-box {
+            background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
+            color: white;
+            padding: 20px;
+            border-radius: 10px;
+            text-align: center;
+        }
+
+        .stat-box h3 {
+            font-size: 2em;
+            margin-bottom: 5px;
+        }
+
+        .stat-box p {
+            opacity: 0.9;
+            font-size: 0.9em;
+        }
+    </style>
+</head>
+<body>
+    <div class="container">
+        <div class="header">
+            <h1>🎬 StreamHub CRUD Interface</h1>
+            <p>Manage Users & Videos - Test Backend API</p>
+        </div>
+
+        <div class="content">
+            <!-- ===== LEFT COLUMN: USERS CRUD ===== -->
+            <div>
+                <div class="tabs">
+                    <button class="tab-button active" onclick="switchTab('users-create')">Create User</button>
+                    <button class="tab-button" onclick="switchTab('users-read')">View Users</button>
+                </div>
+
+                <!-- Create User Form -->
+                <div id="users-create" class="card">
+                    <h2>➕ Create New User</h2>
+                    <form id="userCreateForm" onsubmit="handleCreateUser(event)">
+                        <div class="form-group">
+                            <label for="userName">Full Name</label>
+                            <input type="text" id="userName" placeholder="John Developer" required>
+                        </div>
+                        <div class="form-group">
+                            <label for="userEmail">Email</label>
+                            <input type="email" id="userEmail" placeholder="john@example.com" required>
+                        </div>
+                        <div class="form-group">
+                            <label for="userPassword">Password</label>
+                            <input type="password" id="userPassword" placeholder="Min 6 characters" required>
+                        </div>
+                        <div class="form-group">
+                            <label for="userAvatar">Avatar Emoji</label>
+                            <input type="text" id="userAvatar" placeholder="👨‍💻" value="👤" maxlength="2">
+                        </div>
+                        <div class="form-group">
+                            <label for="userBio">Bio</label>
+                            <textarea id="userBio" placeholder="Tell us about yourself!"></textarea>
+                        </div>
+                        <div class="form-group">
+                            <label for="userVerified">
+                                <input type="checkbox" id="userVerified"> Email Verified
+                            </label>
+                        </div>
+                        <button type="submit" class="btn-primary">Create User</button>
+                    </form>
+                    <div id="userCreateResponse" class="response-container"></div>
+                </div>
+
+                <!-- View Users -->
+                <div id="users-read" class="card" style="display: none;">
+                    <h2>👥 View All Users</h2>
+                    <div class="stats">
+                        <div class="stat-box">
+                            <h3 id="totalUsers">0</h3>
+                            <p>Total Users</p>
+                        </div>
+                        <div class="stat-box">
+                            <h3 id="verifiedUsers">0</h3>
+                            <p>Verified</p>
+                        </div>
+                    </div>
+                    <button class="btn-primary" onclick="loadAllUsers()">Refresh List</button>
+                    <div id="usersLoading" class="loading">⏳ Loading users...</div>
+                    <div id="usersList" class="list-container"></div>
+                    <div id="usersResponse" class="response-container"></div>
+                </div>
+            </div>
+
+            <!-- ===== RIGHT COLUMN: VIDEOS CRUD ===== -->
+            <div>
+                <div class="tabs">
+                    <button class="tab-button active" onclick="switchTab('videos-create')">Create Video</button>
+                    <button class="tab-button" onclick="switchTab('videos-read')">View Videos</button>
+                </div>
+
+                <!-- Create Video Form -->
+                <div id="videos-create" class="card">
+                    <h2>🎥 Create New Video</h2>
+                    <form id="videoCreateForm" onsubmit="handleCreateVideo(event)">
+                        <div class="form-group">
+                            <label for="videoTitle">Video Title</label>
+                            <input type="text" id="videoTitle" placeholder="Belajar JavaScript ES6" required>
+                        </div>
+                        <div class="form-group">
+                            <label for="videoDescription">Description</label>
+                            <textarea id="videoDescription" placeholder="Min 10 characters" required></textarea>
+                        </div>
+                        <div class="form-group">
+                            <label for="videoChannel">Channel Name</label>
+                            <input type="text" id="videoChannel" placeholder="Code Master" required>
+                        </div>
+                        <div class="form-group">
+                            <label for="videoCategory">Category</label>
+                            <select id="videoCategory" required>
+                                <option value="">-- Select Category --</option>
+                                <option value="Coding">Coding</option>
+                                <option value="Design">Design</option>
+                                <option value="Marketing">Marketing</option>
+                                <option value="Business">Business</option>
+                                <option value="Entertainment">Entertainment</option>
+                                <option value="Tutorial">Tutorial</option>
+                                <option value="Gaming">Gaming</option>
+                                <option value="Other">Other</option>
+                            </select>
+                        </div>
+                        <div class="form-group">
+                            <label for="videoDuration">Duration (MM:SS)</label>
+                            <input type="text" id="videoDuration" placeholder="45:30" value="0:00">
+                        </div>
+                        <button type="submit" class="btn-primary">Create Video</button>
+                    </form>
+                    <div id="videoCreateResponse" class="response-container"></div>
+                </div>
+
+                <!-- View Videos -->
+                <div id="videos-read" class="card" style="display: none;">
+                    <h2>🎬 All Videos</h2>
+                    <div class="stats">
+                        <div class="stat-box">
+                            <h3 id="totalVideos">0</h3>
+                            <p>Total Videos</p>
+                        </div>
+                        <div class="stat-box">
+                            <h3 id="publishedVideos">0</h3>
+                            <p>Published</p>
+                        </div>
+                    </div>
+                    <button class="btn-primary" onclick="loadAllVideos()">Refresh List</button>
+                    <div id="videosLoading" class="loading">⏳ Loading videos...</div>
+                    <div id="videosList" class="list-container"></div>
+                    <div id="videosResponse" class="response-container"></div>
+                </div>
+            </div>
+        </div>
+    </div>
+
+    <script>
+        const API_BASE = 'http://localhost:5000/api'
+
+        // ===== TAB SWITCHING =====
+        function switchTab(tabName) {
+            const parts = tabName.split('-')
+            const type = parts[0]
+            const action = parts[1]
+
+            // Hide all tabs of this type
+            document.querySelectorAll(`#${type}-create, #${type}-read`).forEach(el => {
+                el.style.display = 'none'
+            })
+
+            // Show selected tab
+            document.getElementById(tabName).style.display = 'block'
+
+            // Update active button
+            event.target.parentElement.querySelectorAll('.tab-button').forEach(btn => {
+                btn.classList.remove('active')
+            })
+            event.target.classList.add('active')
+
+            // Auto-load data when switching to read tab
+            if (action === 'read') {
+                if (type === 'users') loadAllUsers()
+                if (type === 'videos') loadAllVideos()
+            }
+        }
+
+        // ===== USER OPERATIONS =====
+        async function handleCreateUser(event) {
+            event.preventDefault()
+            const responseDiv = document.getElementById('userCreateResponse')
+
+            const userData = {
+                name: document.getElementById('userName').value,
+                email: document.getElementById('userEmail').value,
+                password: document.getElementById('userPassword').value,
+                avatar: document.getElementById('userAvatar').value || '👤',
+                bio: document.getElementById('userBio').value || '',
+                isVerified: document.getElementById('userVerified').checked
+            }
+
+            try {
+                showResponse(responseDiv, '⏳ Creating user...', 'info')
+                const response = await fetch(`${API_BASE}/users`, {
+                    method: 'POST',
+                    headers: { 'Content-Type': 'application/json' },
+                    body: JSON.stringify(userData)
+                })
+
+                const result = await response.json()
+
+                if (response.ok) {
+                    showResponse(
+                        responseDiv,
+                        `✅ User Created!\nID: ${result.data._id}\nEmail: ${result.data.email}`,
+                        'success'
+                    )
+                    document.getElementById('userCreateForm').reset()
+                    setTimeout(() => loadAllUsers(), 1000)
+                } else {
+                    showResponse(
+                        responseDiv,
+                        `❌ Error: ${result.message || 'Failed to create user'}`,
+                        'error'
+                    )
+                }
+            } catch (error) {
+                showResponse(responseDiv, `❌ Error: ${error.message}`, 'error')
+            }
+        }
+
+        async function loadAllUsers() {
+            const responseDiv = document.getElementById('usersResponse')
+            const listDiv = document.getElementById('usersList')
+            const loadingDiv = document.getElementById('usersLoading')
+
+            try {
+                loadingDiv.classList.add('active')
+                listDiv.innerHTML = ''
+
+                const response = await fetch(`${API_BASE}/users`)
+                const result = await response.json()
+
+                loadingDiv.classList.remove('active')
+
+                if (response.ok && result.data) {
+                    const users = Array.isArray(result.data) ? result.data : [result.data]
+                    const verified = users.filter(u => u.isVerified).length
+
+                    document.getElementById('totalUsers').textContent = users.length
+                    document.getElementById('verifiedUsers').textContent = verified
+
+                    if (users.length === 0) {
+                        listDiv.innerHTML = '<p style="text-align: center; color: #999;">No users found. Create one above!</p>'
+                    } else {
+                        listDiv.innerHTML = users.map(user => `
+                            <div class="list-item">
+                                <div class="list-item-info">
+                                    <strong>${user.avatar} ${user.name}</strong><br>
+                                    ${user.email}
+                                </div>
+                                <button class="btn-danger" style="flex: 0;" onclick="deleteUser('${user._id}')">Delete</button>
+                            </div>
+                        `).join('')
+                    }
+                    showResponse(responseDiv, `✅ Loaded ${users.length} users`, 'success')
+                } else {
+                    showResponse(responseDiv, `❌ Error: ${result.message}`, 'error')
+                }
+            } catch (error) {
+                loadingDiv.classList.remove('active')
+                showResponse(responseDiv, `❌ Error: ${error.message}`, 'error')
+            }
+        }
+
+        async function deleteUser(userId) {
+            if (!confirm('Are you sure you want to delete this user?')) return
+
+            try {
+                const response = await fetch(`${API_BASE}/users/${userId}`, {
+                    method: 'DELETE'
+                })
+
+                if (response.ok) {
+                    alert('✅ User deleted successfully')
+                    loadAllUsers()
+                } else {
+                    alert('❌ Failed to delete user')
+                }
+            } catch (error) {
+                alert(`❌ Error: ${error.message}`)
+            }
+        }
+
+        // ===== VIDEO OPERATIONS =====
+        async function handleCreateVideo(event) {
+            event.preventDefault()
+            const responseDiv = document.getElementById('videoCreateResponse')
+
+            const videoData = {
+                title: document.getElementById('videoTitle').value,
+                description: document.getElementById('videoDescription').value,
+                channel: document.getElementById('videoChannel').value,
+                category: document.getElementById('videoCategory').value,
+                duration: document.getElementById('videoDuration').value,
+                thumbnail: '🎬',
+                videoUrl: 'https://www.w3schools.com/html/mov_bbb.mp4',
+                tags: [],
+                isPublished: true
+            }
+
+            try {
+                showResponse(responseDiv, '⏳ Creating video...', 'info')
+                const response = await fetch(`${API_BASE}/videos`, {
+                    method: 'POST',
+                    headers: { 'Content-Type': 'application/json' },
+                    body: JSON.stringify(videoData)
+                })
+
+                const result = await response.json()
+
+                if (response.ok) {
+                    showResponse(
+                        responseDiv,
+                        `✅ Video Created!\nID: ${result.data._id}\nTitle: ${result.data.title}`,
+                        'success'
+                    )
+                    document.getElementById('videoCreateForm').reset()
+                    setTimeout(() => loadAllVideos(), 1000)
+                } else {
+                    showResponse(
+                        responseDiv,
+                        `❌ Error: ${result.message || 'Failed to create video'}`,
+                        'error'
+                    )
+                }
+            } catch (error) {
+                showResponse(responseDiv, `❌ Error: ${error.message}`, 'error')
+            }
+        }
+
+        async function loadAllVideos() {
+            const responseDiv = document.getElementById('videosResponse')
+            const listDiv = document.getElementById('videosList')
+            const loadingDiv = document.getElementById('videosLoading')
+
+            try {
+                loadingDiv.classList.add('active')
+                listDiv.innerHTML = ''
+
+                const response = await fetch(`${API_BASE}/videos`)
+                const result = await response.json()
+
+                loadingDiv.classList.remove('active')
+
+                if (response.ok && result.data) {
+                    const videos = Array.isArray(result.data) ? result.data : [result.data]
+                    const published = videos.filter(v => v.isPublished).length
+
+                    document.getElementById('totalVideos').textContent = videos.length
+                    document.getElementById('publishedVideos').textContent = published
+
+                    if (videos.length === 0) {
+                        listDiv.innerHTML = '<p style="text-align: center; color: #999;">No videos found. Create one above!</p>'
+                    } else {
+                        listDiv.innerHTML = videos.map(video => `
+                            <div class="list-item">
+                                <div class="list-item-info">
+                                    <strong>${video.thumbnail} ${video.title}</strong><br>
+                                    ${video.channel} • ${video.category}
+                                </div>
+                                <button class="btn-danger" style="flex: 0;" onclick="deleteVideo('${video._id}')">Delete</button>
+                            </div>
+                        `).join('')
+                    }
+                    showResponse(responseDiv, `✅ Loaded ${videos.length} videos`, 'success')
+                } else {
+                    showResponse(responseDiv, `❌ Error: ${result.message}`, 'error')
+                }
+            } catch (error) {
+                loadingDiv.classList.remove('active')
+                showResponse(responseDiv, `❌ Error: ${error.message}`, 'error')
+            }
+        }
+
+        async function deleteVideo(videoId) {
+            if (!confirm('Are you sure you want to delete this video?')) return
+
+            try {
+                const response = await fetch(`${API_BASE}/videos/${videoId}`, {
+                    method: 'DELETE'
+                })
+
+                if (response.ok) {
+                    alert('✅ Video deleted successfully')
+                    loadAllVideos()
+                } else {
+                    alert('❌ Failed to delete video')
+                }
+            } catch (error) {
+                alert(`❌ Error: ${error.message}`)
+            }
+        }
+
+        // ===== UTILITY =====
+        function showResponse(element, message, type) {
+            element.textContent = message
+            element.className = `response-container response-${type}`
+            element.style.display = 'block'
+            setTimeout(() => {
+                if (type === 'success' || type === 'info') {
+                    setTimeout(() => element.style.display = 'none', 3000)
+                }
+            }, 0)
+        }
+
+        // Load initial data
+        window.addEventListener('load', () => {
+            console.log('🚀 CRUD Interface loaded')
+            console.log(`📡 API Base: ${API_BASE}`)
+        })
+    </script>
+</body>
+</html>
